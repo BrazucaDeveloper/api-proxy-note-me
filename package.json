@@ -1,0 +1,23 @@
+{
+  "name": "proxy-note-me",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^2.29.0",
+    "@hono/node-server": "^1.19.6",
+    "@libsql/client": "^0.15.15",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}
