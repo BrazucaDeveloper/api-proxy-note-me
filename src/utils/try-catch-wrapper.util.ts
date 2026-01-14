@@ -13,17 +13,25 @@ export function tryCatchWrapper(handler: AnyFunction) {
     try {
       const data = handler(...args)
       
-      if (data instanceof Promise) {
+      if (data instanceof Promise)
         return data
           .then((resolvedData) => [resolvedData, null])
-          .catch((e) => [ null, e instanceof Error ? e : new Error(String(e)) ]);
-      }
+          .catch((e) => [null, getError(e)])
       
       return [data, null]
     } catch (e) {
-      const error = e instanceof Error ? e : new Error(String(e))
-      console.error(error.cause)
-      return [null, error]
+      return [null, getError(e)]
     }
   }
+}
+
+const getError = (e: unknown): Error => {
+  const errorMoment = new Date()
+  const error = e instanceof Error ? e : new Error(String(e))
+    
+  console.error(`!> [ERROR LOG - AT ${errorMoment.getHours()}:${errorMoment.getMinutes()}:${errorMoment.getSeconds()}] - ${error.name}`)
+  console.log(`!> Error message: ${error.message}`)
+  console.log(`!> Stack trace: ${error.stack}`)
+
+  return error
 }

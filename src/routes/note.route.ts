@@ -27,8 +27,6 @@ note.post('/', async (c) => {
   const owner = c.get('userId')
   const noteToPost = await c.req.json<PostNote>()
   
-  console.log(`Uploading note for user ${owner}`)  
-  
   const [gid, error] = await postNote(owner, noteToPost)
   if (error) return HttpResponse.s500(c, 'Note not upload.')
   
@@ -52,7 +50,6 @@ note.put('/sync/:lastSync', async (c) => {
   const { notes: notesToPush } = await c.req.json<{ notes: [] }>()
   
   const [_, postNoteError] = await postNote(owner, ...notesToPush)
-  console.log(`[Post note error] => ${postNoteError?.message}`)
   if (postNoteError) return HttpResponse.s500(c, 'No notes pushed.')
   
   const [notesToPull, getNoteError] = await getNote(owner, Number(lastSync))

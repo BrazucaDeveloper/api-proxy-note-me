@@ -1,6 +1,6 @@
 import { db } from "db/client.ts"
 import { note } from "db/schema.ts"
-import { and, eq, gte, sql } from "drizzle-orm"
+import { and, eq, getTableColumns, gte, sql } from "drizzle-orm"
 import { tryCatchWrapper } from "utils/try-catch-wrapper.util.ts"
 
 const getNote = tryCatchWrapper(async (owner: string, timestamp?: number) => {
@@ -20,9 +20,11 @@ const postNote = tryCatchWrapper(async (owner: string, ...noteToPost: PostNote[]
   if (noteToPost.length === 0) return []
     
   const values = noteToPost.map(n => ({
-    ...n, owner // Injetamos o dono real vindo da sessão/token
+      ...n, owner // Injetamos o dono real vindo da sessão/token
   }))
 
+  const columns = getTableColumns(note)  
+  
   const notes = await db
     .insert(note)
     .values(values)
@@ -36,7 +38,7 @@ const postNote = tryCatchWrapper(async (owner: string, ...noteToPost: PostNote[]
         status: sql`excluded.status`,
         updatedAt: sql`excluded.updated_at`,
       },
-      setWhere: sql`${note.owner} = ${owner} AND excluded.updated_at >= ${note.updatedAt}`
+      setWhere: sql`${note.owner} = ${owner} AND excluded.${sql.raw(columns.updatedAt.name)} >= ${note.updatedAt}`
     })
    
    return notes // global id of the new notes
@@ -45,7 +47,7 @@ const postNote = tryCatchWrapper(async (owner: string, ...noteToPost: PostNote[]
 type PatchNote = Partial<typeof note.$inferSelect> & { id: string }
 
 const patchNote = tryCatchWrapper(async (noteToPatch: PatchNote) => {
-  const [{ gid }] = await db
+    const [{ gid }] = await db
     .update(note)
     .set(noteToPatch)
     .where(eq(note.id, noteToPatch.id))
